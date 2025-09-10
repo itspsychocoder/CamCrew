@@ -4,8 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-
+import { account, ID } from "@/utils/appwrite";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useState } from "react";
+import { useUserStore } from "@/store/store";
 export default function page() {
+
+  const { setLoggedInUser } = useUserStore();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
+  const login = async (email, password) => {
+    const session = await account.createEmailPasswordSession({
+        email,
+        password
+    });
+    toast.success("Logged in successfully!");
+    setLoggedInUser(await account.get());
+    router.push("/feed");
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#121212] p-4">
       <motion.div
@@ -26,13 +45,15 @@ export default function page() {
           <CardContent className="space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-[#E0E0E0]">
-                  Username
+                <Label htmlFor="email" className="text-[#E0E0E0]">
+                  Email
                 </Label>
                 <Input
-                  id="username"
-                  type="text"
-                  placeholder="Enter your username"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  placeholder="Enter your email"
                   className="bg-[#121212] border border-[#2E7D32]/30 text-[#E0E0E0] placeholder:text-[#E0E0E0]/40 focus-visible:ring-[#00FF9D]"
                 />
               </div>
@@ -43,6 +64,8 @@ export default function page() {
                 <Input
                   id="password"
                   type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   className="bg-[#121212] border border-[#2E7D32]/30 text-[#E0E0E0] placeholder:text-[#E0E0E0]/40 focus-visible:ring-[#00FF9D]"
                 />
@@ -50,6 +73,7 @@ export default function page() {
             </div>
 
             <Button
+            onClick={() => login(email, password)}
               className="w-full bg-[#2E7D32] hover:bg-[#FF6F61] text-[#E0E0E0] rounded-xl py-5 text-base font-medium transition-colors"
             >
               Login

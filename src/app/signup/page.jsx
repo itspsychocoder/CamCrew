@@ -6,10 +6,40 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-
+import { account, ID } from "@/utils/appwrite";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 export default function SignupPage() {
   const [step, setStep] = useState("role");
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState("");
+  const router = useRouter();
+
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const register = async () => {
+   try {
+    const req = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password, username, role })
+    })
+    const data = await req.json();
+    if (data.success){
+      toast.success("Account created successfully! Please log in.");
+      router.push("/login");
+    }
+    else  {
+      toast.error(data.message);
+    }
+   }
+   catch(error) {
+    toast.error(error.message);
+   }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#121212] p-4">
@@ -76,12 +106,14 @@ export default function SignupPage() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="username" className="text-[#E0E0E0]">
-                    Username
+                    Your Name
                   </Label>
                   <Input
                     id="username"
                     type="text"
-                    placeholder="Enter your username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter your name"
                     className="bg-[#121212] border border-[#2E7D32]/30 text-[#E0E0E0] placeholder:text-[#E0E0E0]/40 focus-visible:ring-[#00FF9D]"
                   />
                 </div>
@@ -92,6 +124,8 @@ export default function SignupPage() {
                   <Input
                     id="email"
                     type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
                     className="bg-[#121212] border border-[#2E7D32]/30 text-[#E0E0E0] placeholder:text-[#E0E0E0]/40 focus-visible:ring-[#00FF9D]"
                   />
@@ -103,13 +137,15 @@ export default function SignupPage() {
                   <Input
                     id="password"
                     type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
                     className="bg-[#121212] border border-[#2E7D32]/30 text-[#E0E0E0] placeholder:text-[#E0E0E0]/40 focus-visible:ring-[#00FF9D]"
                   />
                 </div>
               </div>
 
-              <Button className="w-full bg-[#2E7D32] hover:bg-[#FF6F61] text-[#E0E0E0] rounded-xl py-5 text-base font-medium transition-colors">
+              <Button onClick={register} className="w-full bg-[#2E7D32] hover:bg-[#FF6F61] text-[#E0E0E0] rounded-xl py-5 text-base font-medium transition-colors">
                 Sign Up
               </Button>
 

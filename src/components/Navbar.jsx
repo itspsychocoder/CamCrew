@@ -1,14 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
-
+import { account } from "@/utils/appwrite"; 
+import { useUserStore } from "@/store/store";
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { setLoggedInUser } = useUserStore();
+
+  const getCurrentUser = async () => {
+    try {
+      const user = await account.get();
+      console.log("Logged in user:", user);
+      setLoggedInUser(user);
+    } catch (err) {
+      console.log("No user session", err);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    getCurrentUser();
+    }, []);
 
   return (
     <nav className="bg-[#1E1E1E] border-b border-[#2E7D32]/30 text-[#E0E0E0] sticky top-0 z-50">

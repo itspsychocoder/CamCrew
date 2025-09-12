@@ -9,7 +9,7 @@ CamCrew is designed to bring photographers and their clients together in one sea
 
 - **User Roles & Authentication**: Separate accounts for photographers and clients, with secure sign-up and role-based access using Appwrite Auth.
 
-- **Portfolio Management**: Photographers upload and manage photos, organize them into galleries, and customize presentation.
+- **Portfolio Management**: Photographers upload and manage photos, organize them with customize presentation.
 
 - **Secure Client Galleries**: Create private galleries viewable only by specific clients; access controlled through authenticated permissions.
 

@@ -3,36 +3,54 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { databases } from "@/utils/appwrite"; // assuming you store photos in a DB
+import { Client, Storage, Databases, ID, Permission, Role } from "appwrite";
+
 import Image from "next/image";
-const { loggedInUser, setLoggedInUser } = useUserStore();
+import { useUserStore } from "@/store/store";
 
 function page() {
+  const { loggedInUser, setLoggedInUser } = useUserStore();
   const [photos, setPhotos] = useState([]);
 
+  const client = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID);
+
+  const databases = new Databases(client);
+  const storage = new Storage(client);
+
   useEffect(() => {
-    // 🔹 Replace with Appwrite database call for photos
     const fetchPhotos = async () => {
       try {
         const res = await databases.listDocuments(
           process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
-          process.env.NEXT_PUBLIC_APPWRITE_PHOTOS_COLLECTION_ID
+          process.env.NEXT_PUBLIC_COLLECTION_ID
         );
-        setPhotos(res.documents);
+        
+        // Generate image URLs for each photo
+        const photosWithUrls = res.documents.map((photo) => ({
+          ...photo,
+          url: storage.getFilePreview(
+            process.env.NEXT_PUBLIC_BUCKET_ID,
+            photo.imageId  // Use the stored imageId
+          ),
+        }));
+        
+        setPhotos(photosWithUrls);
+        console.log(photosWithUrls);
       } catch (err) {
         console.error(err);
       }
     };
     fetchPhotos();
   }, []);
-
   return (
     <div className="min-h-screen bg-[#121212] p-6">
       <div className="max-w-5xl mx-auto space-y-6">
-      <h1>{loggedInUser?.name}</h1>
-      <h1>{loggedInUser?.email}</h1>
-      <h1>{loggedInUser?.$id}</h1>
-      <h1>{loggedInUser?.role}</h1>
+        <h1>{loggedInUser?.name}</h1>
+        <h1>{loggedInUser?.email}</h1>
+        <h1>{loggedInUser?.$id}</h1>
+        <h1>{loggedInUser?.role}</h1>
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -52,10 +70,10 @@ function page() {
             >
               <Card className="bg-[#1E1E1E] border border-[#2E7D32]/20 shadow-xl rounded-2xl overflow-hidden">
                 <div className="relative w-full h-56">
-                  <Image
+                  <img
                     src={photo.url} // should be from Appwrite Storage
                     alt={photo.caption || "Photo"}
-                    fill
+                    
                     className="object-cover"
                   />
                 </div>
